@@ -31,6 +31,15 @@ const statusEl = document.getElementById("status");
 const resultsEl = document.getElementById("results");
 const form = document.getElementById("searchForm");
 const cityInput = document.getElementById("cityInput");
+const unitToggle = document.getElementById("unitToggle");
+
+let unit = "C";
+let lastPlace = null;
+let lastData = null;
+
+const toFahrenheit = (celsius) => (celsius * 9) / 5 + 32;
+const formatTemp = (celsius) =>
+  `${Math.round(unit === "C" ? celsius : toFahrenheit(celsius))}°${unit}`;
 
 async function geocode(city) {
   const res = await fetch(`${GEO_API}?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
@@ -59,8 +68,8 @@ function renderCurrent(place, data) {
   document.getElementById("locationName").textContent = `${place.name}${place.admin1 ? ", " + place.admin1 : ""}, ${place.country}`;
   document.getElementById("conditionText").textContent = text;
   document.getElementById("tempIcon").textContent = icon;
-  document.getElementById("tempValue").textContent = `${Math.round(data.current.temperature_2m)}°C`;
-  document.getElementById("feelsLike").textContent = `${Math.round(data.current.apparent_temperature)}°C`;
+  document.getElementById("tempValue").textContent = formatTemp(data.current.temperature_2m);
+  document.getElementById("feelsLike").textContent = formatTemp(data.current.apparent_temperature);
   document.getElementById("humidity").textContent = `${data.current.relative_humidity_2m}%`;
   document.getElementById("wind").textContent = `${Math.round(data.current.wind_speed_10m)} km/h`;
 }
@@ -78,8 +87,8 @@ function renderForecast(data) {
       <p class="day-name">${dayName}</p>
       <p class="day-icon">${icon}</p>
       <p class="day-temps">
-        <span class="max">${Math.round(data.daily.temperature_2m_max[i])}°</span>
-        <span class="min">${Math.round(data.daily.temperature_2m_min[i])}°</span>
+        <span class="max">${formatTemp(data.daily.temperature_2m_max[i])}</span>
+        <span class="min">${formatTemp(data.daily.temperature_2m_min[i])}</span>
       </p>
     `;
     forecastEl.appendChild(card);
@@ -93,6 +102,8 @@ async function search(city) {
   try {
     const place = await geocode(city);
     const data = await getForecast(place.latitude, place.longitude);
+    lastPlace = place;
+    lastData = data;
     renderCurrent(place, data);
     renderForecast(data);
     statusEl.hidden = true;
@@ -107,6 +118,15 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   const city = cityInput.value.trim();
   if (city) search(city);
+});
+
+unitToggle.addEventListener("click", () => {
+  unit = unit === "C" ? "F" : "C";
+  unitToggle.textContent = `°${unit}`;
+  if (lastPlace && lastData) {
+    renderCurrent(lastPlace, lastData);
+    renderForecast(lastData);
+  }
 });
 
 search("Poughkeepsie");
