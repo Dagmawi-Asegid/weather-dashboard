@@ -7,11 +7,25 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="weather-scene" id="weatherScene" aria-hidden="true"></div>
+
   <div class="app">
     <header>
       <h1>Weather Dashboard</h1>
-      <form id="searchForm">
-        <input type="text" id="cityInput" placeholder="Search city…" autocomplete="off" />
+      <form id="searchForm" class="search-wrap">
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="cityInput"
+            placeholder="Search city…"
+            autocomplete="off"
+            role="combobox"
+            aria-expanded="false"
+            aria-autocomplete="list"
+            aria-controls="suggestions"
+          />
+          <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
+        </div>
         <button type="submit">Search</button>
       </form>
       <button type="button" id="unitToggle" class="unit-toggle" aria-label="Switch temperature unit">°C</button>
@@ -42,6 +56,8 @@
     </main>
   </div>
 
+  <script src="cities.js"></script>
+  <script src="effects.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
